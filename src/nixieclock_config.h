@@ -3,9 +3,9 @@
 
 /* 辉光管模块引脚 */
 #define PIN_DIN 2
-#define PIN_ST  3
-#define PIN_SH  4
-#define PIN_OE  5
+#define PIN_ST  A2
+#define PIN_SH  A1
+#define PIN_OE  3
 
 /* 辉光管个数 */
 #define NIXIE_NUM 4
