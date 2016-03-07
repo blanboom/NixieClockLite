@@ -68,17 +68,17 @@ void loop() {
 
   /* 防止阴极中毒 */
   if((now.minute() % 10 == 0) && (now.second() <= 35)) {
-    i = 15;
+    i = 30;
     while(i > 0) {
       i--;
       nixieDis.setBackgroundColor(0, (Color)(i % 7));
       nixieDis.setBackgroundColor(1, (Color)((i + 1) % 7));
       nixieDis.setBackgroundColor(2, (Color)((i + 2) % 7));
-      nixieDis.setBackgroundColor(2, (Color)((i + 3) % 7));
+      nixieDis.setBackgroundColor(3, (Color)((i + 3) % 7));
       for(j = 0; j < 10; j++){
         nixieDis.printf("%d:%d:%d:%d", j, (j + 1) % 10, (j + 2) % 10, (j + 3) % 10);
         nixieDis.display();
-        delay(10);
+        delay(35);
       }
     }
   }
