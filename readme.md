@@ -1,4 +1,4 @@
-# 使用 Bluno 制作辉光管时钟
+# 四位辉光管时钟
 
 [![Build Status](https://travis-ci.org/blanboom/NixieClockLite.svg?branch=master)](https://travis-ci.org/blanboom/NixieClockLite)
 
