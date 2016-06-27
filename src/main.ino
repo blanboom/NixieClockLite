@@ -25,6 +25,8 @@ bool timeChanged; // 如果时间被重新设置，该值变为
 unsigned long currentSysTime = 0; // Arduino millis 函数得到的时间
 unsigned long tmpSysTime = 0;
 
+unsigned char default_color = Blue;
+
 // int alarmHour = 0, alarmMinute = 0;
 
 void setup() {
@@ -39,10 +41,10 @@ void setup() {
   displayBuffer[1] = 0;
   displayBuffer[2] = 0;
   displayBuffer[3] = 0;
-  displayBuffer[4] = (char)Blue;
-  displayBuffer[5] = (char)Blue;
-  displayBuffer[6] = (char)Blue;
-  displayBuffer[7] = (char)Blue;
+  displayBuffer[4] = (char)default_color;
+  displayBuffer[5] = (char)default_color;
+  displayBuffer[6] = (char)default_color;
+  displayBuffer[7] = (char)default_color;
   displayBuffer[8] = 255;
   displayBuffer[9] = (char)None;
   displayBuffer[10] = (char)None;
@@ -134,6 +136,12 @@ void loop() {
       //     alarmMinute--;
       //     alarmMinute = abs(alarmMinute % 60);
       //     break;
+      case 'S':
+        default_color += 1; default_color = default_color % 8;
+        displayBuffer[4] = (char)default_color;
+        displayBuffer[5] = (char)default_color;
+        displayBuffer[6] = (char)default_color;
+        displayBuffer[7] = (char)default_color;
       default:
         break;
       }
