@@ -226,9 +226,12 @@ void loop() {
     tmpSysTime2 = millis();
     shackDetectorCounter = 0;
     if (alarmHour != 0 && alarmMinute != 0) { // 闹钟时、分均为 0 时，闹钟关闭
-      int tmpMinuteDiff = ((int)(now.hour() * 60 + now.minute()) - (int)(alarmHour * 60 + alarmMinute));
+      int tmpMinuteDiff = ((int)(now.hour() * 60 + now.minute()) -
+                           (int)(alarmHour * 60 + alarmMinute));
       if (tmpMinuteDiff >= 0 && tmpMinuteDiff <= 15) { // 闹钟最长响 15 分钟
-        if(shouldAlarmContinue == true) { alarm(PIN_BEEP, alarm_sound); }
+        if (shouldAlarmContinue == true) {
+          alarm(PIN_BEEP, alarm_sound);
+        }
       } else {
         shouldAlarmContinue = true;
       }
@@ -250,7 +253,7 @@ void alarm(uint8_t mPin, uint8_t var) {
     delay(400);
     tone(mPin, 500, 300);
     delay(400);
-    //break;
+  // break;
   case 1: // sa jiao
     for (int i = 200; i < 990; i++) {
       tone(mPin, i, 10);
