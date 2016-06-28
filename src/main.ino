@@ -26,10 +26,12 @@ unsigned long currentSysTime = 0; // Arduino millis 函数得到的时间
 unsigned long tmpSysTime = 0;
 
 unsigned char default_color = Blue;
+unsigned char alarm_sound = 0;
 
 // int alarmHour = 0, alarmMinute = 0;
 
 void setup() {
+  // tone(PIN_BEEP, 1000);
   /* 启动 RTC */
   rtc.begin();
 
@@ -59,7 +61,7 @@ void setup() {
 
 void loop() {
   currentSysTime = millis();
-  if (currentSysTime - tmpSysTime > 150) {
+  if (currentSysTime - tmpSysTime > 100) {
     tmpSysTime = millis();
     /* 获取现在时间 */
     now = rtc.now();
@@ -132,12 +134,14 @@ void loop() {
       //     alarmMinute++;
       //     alarmMinute = abs(alarmMinute % 60);
       //     break;
-      //   case 'D':
-      //     alarmMinute--;
-      //     alarmMinute = abs(alarmMinute % 60);
-      //     break;
-      case 'S':
-        default_color += 1; default_color = default_color % 8;
+      case 'D':
+        alarm_sound++;
+        alarm_sound = alarm_sound % 13;
+        alarm(PIN_BEEP, alarm_sound);
+        break;
+      case 'S': // 设置背景灯颜色
+        default_color += 1;
+        default_color = default_color % 8;
         displayBuffer[4] = (char)default_color;
         displayBuffer[5] = (char)default_color;
         displayBuffer[6] = (char)default_color;
@@ -165,7 +169,7 @@ void loop() {
     }
 
     /* 防止阴极中毒 */
-    if ((now.minute() % 10 == 0) && (now.second() <= 40)) {
+    if ((now.minute() % 10 == 0) && (now.second() <= 45)) {
       if (timeChanged == false) {
         i = 30;
         while (i > 0) {
@@ -175,10 +179,9 @@ void loop() {
           nixieDis.setBackgroundColor(2, (Color)((i + 2) % 7));
           nixieDis.setBackgroundColor(3, (Color)((i + 3) % 7));
           for (j = 0; j < 10; j++) {
-            nixieDis.printf("%d:%d:%d:%d", j, (j + 1) % 10, (j + 2) % 10,
-                            (j + 3) % 10);
+            nixieDis.printf("%d:%d:%d:%d", j, j, j, j);
             nixieDis.display();
-            delay(35);
+            delay(60);
           }
         }
       }
@@ -207,5 +210,122 @@ void loop() {
     // Serial.print(alarmHour);
     // Serial.print(":");
     // Serial.print(alarmMinute);
+  }
+}
+
+void alarm(uint8_t mPin, uint8_t var) {
+  switch (var) {
+  case 0:
+    tone(mPin, 500, 300);
+    delay(400);
+    tone(mPin, 500, 300);
+    delay(400);
+  case 1: // sa jiao
+    for (int i = 200; i < 990; i++) {
+      tone(mPin, i, 10);
+    }
+    for (int i = 990; i > 200; i--) {
+      tone(mPin, i, 10);
+    }
+    for (int i = 200; i < 350; i++) {
+      tone(mPin, i, 10);
+    }
+    delay(500);
+    break;
+  case 2: // di di
+    tone(mPin, 900, 200);
+    delay(200);
+    tone(mPin, 900, 200);
+    delay(200);
+    break;
+  case 3: // de li
+    tone(mPin, 300, 400);
+    delay(50);
+    tone(mPin, 400, 250);
+    delay(50);
+    break;
+  case 4: // du da
+    tone(mPin, 300, 500);
+    delay(100);
+    for (int i = 300; i < 500; i++) {
+      tone(mPin, i, 5);
+    }
+    delay(50);
+    break;
+  case 5: // du~ do~~
+    for (int i = 450; i < 650; i++) {
+      tone(mPin, i);
+      delay(1);
+    }
+    noTone(mPin);
+    delay(500);
+    //
+    for (int i = 450; i < 750; i++) {
+      tone(mPin, i);
+      delay(1);
+    }
+    noTone(mPin);
+    delay(500);
+    break;
+  case 6: // du_-`~
+    for (int i = 1000; i < 1400; i++) {
+      tone(mPin, i);
+      delay(1);
+    }
+    noTone(mPin);
+    delay(100);
+    break;
+  case 7: // di- dang-_
+    tone(mPin, 1200);
+    delay(100);
+    noTone(mPin);
+    delay(100);
+    for (int i = 900; i > 300; i--) {
+      tone(mPin, i);
+      delay(1);
+    }
+    noTone(mPin);
+    delay(100);
+    break;
+  case 8: // dang~ dang-
+    tone(mPin, 1100);
+    delay(120);
+    noTone(mPin);
+    delay(100);
+    tone(mPin, 600);
+    delay(350);
+    noTone(mPin);
+    delay(100);
+    break;
+  case 9: // u- u~
+    tone(mPin, 150);
+    delay(400);
+    noTone(mPin);
+    delay(250);
+    tone(mPin, 200);
+    delay(400);
+    noTone(mPin);
+    delay(100);
+    break;
+  case 12: // bee boo
+    for (int i = 300; i < 400; i++) {
+      tone(mPin, i);
+      delay(1);
+    }
+    tone(mPin, 400);
+    delay(200);
+    for (int i = 400; i > 350; i--) {
+      tone(mPin, i);
+      delay(1);
+    }
+    tone(mPin, 350);
+    delay(200);
+    noTone(mPin);
+    break;
+  default: // bee bee
+    tone(mPin, 500, 300);
+    delay(400);
+    tone(mPin, 500, 300);
+    delay(400);
   }
 }

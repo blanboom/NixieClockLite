@@ -13,4 +13,7 @@
 /* DS18B20 引脚 */
 #define DS_PIN A0
 
+/* 蜂鸣器引脚 */
+#define PIN_BEEP 5
+
 #endif
