@@ -22,16 +22,24 @@ char displayBuffer[13];
 int i, j, k, tmp; // 用于 for 循环的技术
 bool timeChanged; // 如果时间被重新设置，该值变为
                   // true，用于判断是否进入防阴极中毒模式
+
 unsigned long currentSysTime = 0; // Arduino millis 函数得到的时间
-unsigned long tmpSysTime = 0;
+unsigned long tmpSysTime1 = 0;
+unsigned long tmpSysTime2 = 0;
 
-unsigned char default_color = Blue;
-unsigned char alarm_sound = 0;
+unsigned char default_color = Blue; // 背景灯默认颜色
 
-// int alarmHour = 0, alarmMinute = 0;
+unsigned char alarm_sound = 0;      // 闹钟声音
+int alarmHour = 0, alarmMinute = 0; // 闹钟时间
+bool shouldAlarmContinue = true; // 此变量用于在闹钟响起时，通过一些方法关闭闹钟
+
+bool shackDetectorState = false; // 滚珠开关引脚状态（用于检测设备摇动）
+int shackDetectorCounter = 0;
 
 void setup() {
-  // tone(PIN_BEEP, 1000);
+  /* 设置滚珠开关引脚工作模式 */
+  pinMode(PIN_SWITCH, INPUT_PULLUP);
+
   /* 启动 RTC */
   rtc.begin();
 
@@ -54,15 +62,17 @@ void setup() {
   displayBuffer[12] = (char)None;
 
   currentSysTime = millis();
-  tmpSysTime = millis();
+  tmpSysTime1 = millis();
+  tmpSysTime2 = millis();
+  now = rtc.now();
 
   timeChanged = false;
 }
 
 void loop() {
   currentSysTime = millis();
-  if (currentSysTime - tmpSysTime > 100) {
-    tmpSysTime = millis();
+  if (currentSysTime - tmpSysTime1 > 100) {
+    tmpSysTime1 = millis();
     /* 获取现在时间 */
     now = rtc.now();
 
@@ -121,19 +131,18 @@ void loop() {
         now = rtc.now();
         timeChanged = true;
         break;
-      //   /* 设置闹钟 */
-      //   case 'U':
-      //     alarmHour++;
-      //     alarmHour = abs(alarmHour % 24);
-      //     break;
-      //   case 'L':
-      //     alarmHour--;
-      //     alarmHour = abs(alarmHour % 24);
-      //     break;
-      //   case 'R':
-      //     alarmMinute++;
-      //     alarmMinute = abs(alarmMinute % 60);
-      //     break;
+      /* 设置闹钟 */
+      case 'U':
+        alarmHour++;
+        alarmHour = alarmHour % 24;
+        break;
+      case 'L':
+        alarmMinute++;
+        alarmMinute = alarmMinute % 60;
+        break;
+      case 'R':
+        shouldAlarmContinue = false; // 在闹钟响起时关闭闹钟
+        break;
       case 'D':
         alarm_sound++;
         alarm_sound = alarm_sound % 13;
@@ -204,12 +213,33 @@ void loop() {
     nixieDis.setColon(2, (Colon)displayBuffer[11]);
     nixieDis.setColon(3, (Colon)displayBuffer[12]);
     nixieDis.display();
-    //
-    // /* 通过蓝牙发送闹钟时间 */
-    // Serial.print("[Alarm]");
-    // Serial.print(alarmHour);
-    // Serial.print(":");
-    // Serial.print(alarmMinute);
+
+    /* 通过蓝牙发送闹钟时间 */
+    Serial.print("[Alarm]");
+    Serial.print(alarmHour);
+    Serial.print(":");
+    Serial.print(alarmMinute);
+  }
+
+  /* 闹钟相关程序 */
+  if (currentSysTime - tmpSysTime2 > 3000) {
+    tmpSysTime2 = millis();
+    shackDetectorCounter = 0;
+    if (alarmHour != 0 && alarmMinute != 0) { // 闹钟时、分均为 0 时，闹钟关闭
+      int tmpMinuteDiff = ((int)(now.hour() * 60 + now.minute()) - (int)(alarmHour * 60 + alarmMinute));
+      if (tmpMinuteDiff >= 0 && tmpMinuteDiff <= 15) { // 闹钟最长响 15 分钟
+        if(shouldAlarmContinue == true) { alarm(PIN_BEEP, alarm_sound); }
+      } else {
+        shouldAlarmContinue = true;
+      }
+    }
+  }
+  if (shackDetectorState != digitalRead(PIN_SWITCH)) {
+    shackDetectorState = !shackDetectorState;
+    shackDetectorCounter++;
+  }
+  if (shackDetectorCounter > 3) {
+    shouldAlarmContinue = false;
   }
 }
 
@@ -220,6 +250,7 @@ void alarm(uint8_t mPin, uint8_t var) {
     delay(400);
     tone(mPin, 500, 300);
     delay(400);
+    //break;
   case 1: // sa jiao
     for (int i = 200; i < 990; i++) {
       tone(mPin, i, 10);
