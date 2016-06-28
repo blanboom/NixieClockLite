@@ -225,7 +225,7 @@ void loop() {
   if (currentSysTime - tmpSysTime2 > 3000) {
     tmpSysTime2 = millis();
     shackDetectorCounter = 0;
-    if (alarmHour != 0 && alarmMinute != 0) { // 闹钟时、分均为 0 时，闹钟关闭
+    if (alarmHour != 0 || alarmMinute != 0) { // 闹钟时、分均为 0 时，闹钟关闭
       int tmpMinuteDiff = ((int)(now.hour() * 60 + now.minute()) -
                            (int)(alarmHour * 60 + alarmMinute));
       if (tmpMinuteDiff >= 0 && tmpMinuteDiff <= 15) { // 闹钟最长响 15 分钟
